@@ -2,18 +2,74 @@
 <html>
 <head>
     <title>Drowsiness Detection</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
-<h2>Driver Drowsiness Detection</h2>
+<div class="container">
+    <h2>🚗 Driver Drowsiness Detection</h2>
 
-<form action="/predict" method="post" enctype="multipart/form-data">
-    <input type="file" name="file" required>
-    <button type="submit">Predict</button>
-</form>
+    <form action="/predict" method="post" enctype="multipart/form-data" onsubmit="showLoader()">
+        
+        <!-- File Input -->
+        <input type="file" name="file" id="fileInput" required onchange="previewImage(event)">
 
+        <!-- Image Preview -->
+        <img id="preview" src="#" alt="Preview" style="display:none;"/>
+
+        <!-- Button -->
+        <button type="submit">Predict</button>
+
+    </form>
+
+    <!-- Loader -->
+    <div id="loader" class="loader" style="display:none;"></div>
+
+    {% if prediction %}
+        <h3 id="result">{{ prediction }}</h3>
+    {% endif %}
+</div>
+
+<br>
+<a href="/video" target="_blank">
+    <button type="button">Start Live Detection</button>
+</a>
+
+<!-- JS -->
+<script>
+function previewImage(event) {
+    const image = document.getElementById('preview');
+    image.src = URL.createObjectURL(event.target.files[0]);
+    image.style.display = "block";
+}
+
+function showLoader() {
+    document.getElementById("loader").style.display = "block";
+}
+
+/* Result Styling + Sound */
+window.onload = function() {
+    let result = document.getElementById("result");
+    if(result){
+        let text = result.innerText.toLowerCase();
+
+        if(text.includes("closed") || text.includes("yawning")){
+            result.style.background = "#ff4d4d";
+            result.style.color = "white";
+
+            let audio = new Audio("https://www.soundjay.com/buttons/beep-01a.mp3");
+            audio.play();
+        } else {
+            result.style.background = "#28a745";
+            result.style.color = "white";
+        }
+    }
+    
+}
+</script>
 {% if prediction %}
-    <h3>Result: {{ prediction }}</h3>
+    <h3 id="result">{{ prediction }}</h3>
+    <p id="confidence">Confidence: {{ confidence }}%</p>
 {% endif %}
 
 </body>
